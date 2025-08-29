@@ -1,0 +1,20 @@
+name: Build and Push Collector
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'collector/**'
+      - 'protobuf/**'
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/reusable-build-push-gateway.yml
+    with:
+      dockerfile-path: ./collector/Dockerfile
+      aws-region: us-east-1
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      ECR_REPOSITORY: ${{ secrets.COLLECTOR_ECR_REPOSITORY }}

@@ -1,0 +1,67 @@
+name: Reusable Build and Push Gateway to ECR
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile-path:
+        description: 'Path to the Dockerfile relative to the monorepo root (e.g., ./gateway/Dockerfile)'
+        required: true
+        type: string
+      aws-region:
+        description: 'AWS region for ECR (e.g., us-east-1)'
+        required: false
+        default: us-east-1
+        type: string
+      platforms:
+        description: 'List of target platforms for build'
+        required: false
+        default: 'linux/amd64'
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        description: 'AWS Access Key ID'
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        description: 'AWS Secret Access Key'
+        required: true
+      ECR_REPOSITORY:
+        description: 'ECR repository to push the image to'
+        required: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker image
+        id: build-and-push-image
+        uses: docker/build-push-action@v5
+        with:
+          platforms: ${{ inputs.platforms }}
+          context: .
+          file: ${{ inputs.dockerfile-path }}
+          push: true
+          tags: ${{ secrets.ECR_REPOSITORY }}:latest
+
+      - name: Logout of Amazon ECR
+        if: always()
+        run: docker logout ${{ steps.login-ecr.outputs.registry }}
