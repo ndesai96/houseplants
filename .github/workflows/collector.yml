@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-and-push:
-    uses: ./.github/workflows/reusable-build-push-gateway.yml
+    uses: ./.github/workflows/reusable-build-and-push.yml
     with:
       dockerfile-path: ./collector/Dockerfile
       aws-region: us-east-1
