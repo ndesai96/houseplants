@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket       = "neil-desai-terraform-states"
-    key          = "go_fiber_hello_world/db/terraform.tfstate"
+    key          = "houseplants-collector/terraform.tfstate"
     region       = "us-east-1"
     use_lockfile = true
     encrypt      = true
@@ -20,7 +20,7 @@ provider "aws" {
 }
 
 locals {
-  name = "go-fiber-hello-world"
+  name = "houseplants-collector"
 }
 
 module "vpc" {
