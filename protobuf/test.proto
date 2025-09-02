@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option go_package = "github.com/ndesai96/houseplants/protobuf";
-
-package protobuf;
-
-message Test {
-  int32 value = 1;
-}

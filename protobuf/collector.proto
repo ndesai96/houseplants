@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "github.com/ndesai96/houseplants/protobuf";
+
+package protobuf;
+
+service Collector {
+  rpc SendMoistureData (SendMoistureDataRequest) returns (SendMoistureDataResponse) {}
+}
+
+message SendMoistureDataRequest {}
+
+message SendMoistureDataResponse {}
