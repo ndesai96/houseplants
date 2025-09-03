@@ -23,4 +23,9 @@ certs:
 	@echo "Generating certificates"
 	./scripts/gen-certs.sh
 
-.PHONY: protoc collector gateway certs
+docker:
+	@echo "Building Docker images"
+	docker build -t houseplants-gateway -f gateway/Dockerfile .
+	docker build -t houseplants-collector -f collector/Dockerfile .
+
+.PHONY: protoc collector gateway certs docker

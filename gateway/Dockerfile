@@ -27,7 +27,7 @@ RUN make protoc
 WORKDIR /app/gateway
 ARG TARGETOS
 ARG TARGETARCH
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o main main.go
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o main .
 
 # Final stage
 FROM alpine:latest
