@@ -37,8 +37,5 @@ WORKDIR /app
 # Copy the binary from builder
 COPY --from=builder /app/gateway/main .
 
-# Expose port 50051
-EXPOSE 50051
-
 # Run the application
 CMD ["./main"]
