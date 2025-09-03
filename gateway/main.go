@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import "context"
 
 func main() {
-	fmt.Println("Hello, world!")
+	g := newGateway()
+	ctx := context.Background()
+	g.start(ctx)
+
+	<-ctx.Done()
+	g.stop()
 }
