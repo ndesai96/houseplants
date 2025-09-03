@@ -18,11 +18,10 @@ func main() {
 	s := grpc.NewServer()
 	pb.RegisterCollectorServer(s, &collector{})
 
+	log.Println("Listening on port 50051...")
 	if err = s.Serve(lis); err != nil {
 		panic(err)
 	}
-
-	log.Println("Listening on port 50051...")
 }
 
 type collector struct {

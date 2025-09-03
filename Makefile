@@ -3,6 +3,11 @@ protoc:
 	cd protobuf && protoc --go_out=. --go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative --go_opt=paths=source_relative *.proto
 
+collector:
+	@echo "Starting collector"
+	cd collector && \
+		go run .
+
 gateway:
 	@echo "Starting gateway"
 	cd gateway && \
@@ -18,4 +23,4 @@ certs:
 	@echo "Generating certificates"
 	./scripts/gen-certs.sh
 
-.PHONY: protoc gateway certs
+.PHONY: protoc collector gateway certs
