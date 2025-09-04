@@ -4,3 +4,9 @@ services:
     container_name: collector
     ports:
       - 50051:50051
+    networks:
+      - houseplants-network
+
+networks:
+  houseplants-network:
+    external: true

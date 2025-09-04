@@ -8,3 +8,9 @@ services:
       - ./log:/mosquitto/log
     ports:
       - 1883:1883
+    networks:
+      - houseplants-network
+
+networks:
+  houseplants-network:
+    external: true

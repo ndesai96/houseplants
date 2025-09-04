@@ -2,3 +2,18 @@ services:
   gateway:
     image: houseplants-gateway:latest
     container_name: gateway
+    volumes:
+      - ../../certs:/certs
+    environment:
+      COLLECTOR_ADDR: collector:50051
+      CLIENT_CERT: /certs/client.crt
+      CLIENT_KEY: /certs/client.key
+      MQTT_BROKER_ADDR: mosquitto:1883
+      MQTT_CLIENT_ID: gateway
+      MQTT_TOPIC: houseplants/#
+    networks:
+      - houseplants-network
+
+networks:
+  houseplants-network:
+    external: true
