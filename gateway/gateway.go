@@ -66,7 +66,7 @@ func (g *gateway) stop() {
 func buildCollectorClient() (pb.CollectorClient, closeFunc) {
 	certificate, err := tls.LoadX509KeyPair(clientCert, clientKey)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to load client certificate: %s", err)
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -75,7 +75,7 @@ func buildCollectorClient() (pb.CollectorClient, closeFunc) {
 
 	conn, err := grpc.NewClient(collectorAddr, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to create collector client: %s", err)
 	}
 
 	return pb.NewCollectorClient(conn), conn.Close

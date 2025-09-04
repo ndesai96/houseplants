@@ -1,0 +1,4 @@
+services:
+  gateway:
+    image: houseplants-gateway:latest
+    container_name: gateway
