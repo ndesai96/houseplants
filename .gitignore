@@ -37,3 +37,7 @@ override.tf.json
 terraform.rc
 
 certs/
+
+# Docker artifacts
+docker/influxdb/config
+docker/influxdb/data
