@@ -27,10 +27,10 @@ RUN make protoc
 WORKDIR /app/collector
 ARG TARGETOS
 ARG TARGETARCH
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o main .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-w -s" -o main .
 
 # Final stage
-FROM alpine:latest
+FROM scratch
 
 WORKDIR /app
 
