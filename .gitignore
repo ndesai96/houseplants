@@ -39,4 +39,7 @@ terraform.rc
 certs/
 
 # Docker artifacts
-docker/influxdb
+docker/influxdb/config
+docker/influxdb/data
+docker/mosquitto/data
+docker/mosquitto/log
