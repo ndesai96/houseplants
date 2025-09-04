@@ -8,6 +8,8 @@ service Collector {
   rpc SendMoistureData (SendMoistureDataRequest) returns (SendMoistureDataResponse) {}
 }
 
-message SendMoistureDataRequest {}
+message SendMoistureDataRequest {
+  string deviceID = 1;
+}
 
 message SendMoistureDataResponse {}

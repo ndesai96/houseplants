@@ -8,6 +8,7 @@ services:
       COLLECTOR_ADDR: collector:50051
       CLIENT_CERT: /certs/client.crt
       CLIENT_KEY: /certs/client.key
+      CA_CERT: /certs/ca.crt
       MQTT_BROKER_ADDR: mosquitto:1883
       MQTT_CLIENT_ID: gateway
       MQTT_TOPIC: houseplants/#

@@ -2,8 +2,14 @@ services:
   collector:
     image: houseplants-collector:latest
     container_name: collector
+    volumes:
+      - ../../certs:/certs
     ports:
       - 50051:50051
+    environment:
+      SERVER_CERT: /certs/server.crt
+      SERVER_KEY: /certs/server.key
+      CA_CERT: /certs/ca.crt
     networks:
       - houseplants-network
 
