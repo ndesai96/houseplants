@@ -29,4 +29,12 @@ docker:
 	docker build -t houseplants-gateway -f gateway/Dockerfile .
 	docker build -t houseplants-collector -f collector/Dockerfile .
 
-.PHONY: protoc collector gateway certs docker
+tidy:
+	@echo "Running go mod tidy in collector, gateway, and protobuf"
+	cd collector && go mod tidy
+	cd gateway && go mod tidy
+	cd protobuf && go mod tidy
+	@echo "Running go work sync at root"
+	go work sync
+
+.PHONY: protoc collector gateway certs docker tidy
