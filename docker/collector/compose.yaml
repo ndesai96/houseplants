@@ -10,6 +10,10 @@ services:
       SERVER_CERT: /certs/server.crt
       SERVER_KEY: /certs/server.key
       CA_CERT: /certs/ca.crt
+      INFLUXDB_URL: http://influxdb:8086
+      INFLUXDB_TOKEN: 1bf3923b-f692-4ed5-86df-2bcee192b72f
+      INFLUXDB_ORG: home
+      INFLUXDB_BUCKET: houseplants
     networks:
       - houseplants-network
 

@@ -3,8 +3,8 @@ services:
     image: influxdb:2
     container_name: influxdb
     volumes:
-      - ./influxdb/data:/var/lib/influxdb2
-      - ./influxdb/config:/etc/influxdb2
+      - ./data:/var/lib/influxdb2
+      - ./config:/etc/influxdb2
     ports:
       - 8086:8086
     environment:
@@ -12,5 +12,11 @@ services:
       DOCKER_INFLUXDB_INIT_USERNAME: admin
       DOCKER_INFLUXDB_INIT_PASSWORD: houseplants
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: 1bf3923b-f692-4ed5-86df-2bcee192b72f
-      DOCKER_INFLUXDB_INIT_ORG: houseplants
-      DOCKER_INFLUXDB_INIT_BUCKET: moisture
+      DOCKER_INFLUXDB_INIT_ORG: home
+      DOCKER_INFLUXDB_INIT_BUCKET: houseplants
+    networks:
+      - houseplants-network
+
+networks:
+  houseplants-network:
+    external: true
