@@ -20,9 +20,9 @@ gateway:
 		go run .
 
 certs:
-	@echo "Creating certificates"
+	@echo "Generating certificates"
 	cd certs && \
-		./create-certs.sh
+		./generate-certs.sh $(HOSTNAME)
 
 docker:
 	@echo "Building Docker images"
