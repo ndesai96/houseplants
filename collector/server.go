@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -19,9 +20,10 @@ import (
 )
 
 var (
-	serverCert = os.Getenv("SERVER_CERT")
-	serverKey  = os.Getenv("SERVER_KEY")
-	caCertFile = os.Getenv("CA_CERT")
+	serverCert     = os.Getenv("SERVER_CERT")
+	serverKey      = os.Getenv("SERVER_KEY")
+	caCertFile     = os.Getenv("CA_CERT")
+	mTLSEnabled, _ = strconv.ParseBool(os.Getenv("MTLS_ENABLED"))
 )
 
 type server struct {
@@ -54,7 +56,12 @@ func (s *server) start() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer(grpc.Creds(buildTransportCredentials()))
+	var opts []grpc.ServerOption
+	if mTLSEnabled {
+		opts = append(opts, grpc.Creds(buildTransportCredentials()))
+	}
+
+	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterCollectorServer(grpcServer, s)
 
 	log.Println("Listening on port 50051...")

@@ -14,6 +14,7 @@ services:
       INFLUXDB_TOKEN: 1bf3923b-f692-4ed5-86df-2bcee192b72f
       INFLUXDB_ORG: home
       INFLUXDB_BUCKET: houseplants
+      MTLS_ENABLED: true
     networks:
       - houseplants-network
 
