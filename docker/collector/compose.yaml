@@ -7,8 +7,8 @@ services:
     ports:
       - 50051:50051
     environment:
-      SERVER_CERT: /certs/server.crt
-      SERVER_KEY: /certs/server.key
+      SERVER_CERT: /certs/collector.crt
+      SERVER_KEY: /certs/collector.key
       CA_CERT: /certs/ca.crt
       INFLUXDB_URL: http://influxdb:8086
       INFLUXDB_TOKEN: 1bf3923b-f692-4ed5-86df-2bcee192b72f
