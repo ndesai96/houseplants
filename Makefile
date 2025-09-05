@@ -37,4 +37,8 @@ tidy:
 	@echo "Running go work sync at root"
 	go work sync
 
-.PHONY: protoc collector gateway certs docker tidy
+mock-sensor:
+	@echo "Mocking moisture sensor"
+	cd gateway/publisher && go run publisher.go
+
+.PHONY: protoc collector gateway certs docker tidy mock-sensor
