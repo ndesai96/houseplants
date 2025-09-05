@@ -8,18 +8,24 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/ndesai96/houseplants/gateway/tls"
 	pb "github.com/ndesai96/houseplants/protobuf"
 )
 
 var (
-	topic = "houseplants/living-room"
+	topic  = "houseplants/living-room"
+	broker = "ssl://localhost:8883"
 )
 
 func main() {
 	// Define broker and client options
-	broker := "tcp://localhost:1883"
 	opts := mqtt.NewClientOptions().AddBroker(broker)
 	opts.SetClientID("go_publisher")
+	tlsConfig, err := tls.BuildTLSConfig()
+	if err != nil {
+		log.Fatalf("Failed to build TLS config: %s", err)
+	}
+	opts.SetTLSConfig(tlsConfig)
 
 	// Create and connect the client
 	client := mqtt.NewClient(opts)
@@ -32,9 +38,9 @@ func main() {
 	defer client.Disconnect(250)
 
 	for {
-		message, err := json.Marshal(generateMoistureData())
-		if err != nil {
-			log.Fatalf("Failed to marshal message: %v", err)
+		message, marshalErr := json.Marshal(generateMoistureData())
+		if marshalErr != nil {
+			log.Fatalf("Failed to marshal message: %v", marshalErr)
 		}
 
 		token := client.Publish(topic, 0, false, message)

@@ -6,8 +6,9 @@ services:
       - ./config:/mosquitto/config
       - ./data:/mosquitto/data
       - ./log:/mosquitto/log
+      - ../../certs:/certs
     ports:
-      - 1883:1883
+      - 8883:8883
     networks:
       - houseplants-network
 

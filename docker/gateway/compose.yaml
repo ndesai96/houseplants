@@ -9,7 +9,7 @@ services:
       CLIENT_CERT: /certs/gateway.crt
       CLIENT_KEY: /certs/gateway.key
       CA_CERT: /certs/ca.crt
-      MQTT_BROKER_ADDR: mosquitto:1883
+      MQTT_BROKER_ADDR: ssl://mosquitto:8883
       MQTT_CLIENT_ID: gateway
       MQTT_TOPIC: houseplants/#
     networks:

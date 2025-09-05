@@ -14,6 +14,7 @@ gateway:
 		COLLECTOR_ADDR=localhost:50051 \
 		CLIENT_CERT=../certs/client.crt \
 		CLIENT_KEY=../certs/client.key \
+		CA_CERT=../certs/ca.crt
 		MQTT_BROKER_ADDR=localhost:1883 \
 		MQTT_CLIENT_ID=gateway \
 		MQTT_TOPIC=houseplants/# \
@@ -22,7 +23,7 @@ gateway:
 certs:
 	@echo "Generating certificates"
 	cd certs && \
-		./generate-certs.sh $(HOSTNAME)
+		./generate-certs.sh $(COLLECTOR_HOSTNAME) $(BROKER_HOSTNAME)
 
 docker:
 	@echo "Building Docker images"
@@ -39,6 +40,10 @@ tidy:
 
 mock-sensor:
 	@echo "Mocking moisture sensor"
-	cd gateway/publisher && go run publisher.go
+	cd gateway/publisher && \
+		CLIENT_CERT=../../certs/sensor.crt \
+        CLIENT_KEY=../../certs/sensor.key \
+        CA_CERT=../../certs/ca.crt \
+		go run publisher.go
 
 .PHONY: protoc collector gateway certs docker tidy mock-sensor

@@ -3,24 +3,21 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"log"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	tlsutil "github.com/ndesai96/houseplants/gateway/tls"
 	pb "github.com/ndesai96/houseplants/protobuf"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var (
 	collectorAddr  = os.Getenv("COLLECTOR_ADDR")
-	clientCert     = os.Getenv("CLIENT_CERT")
-	clientKey      = os.Getenv("CLIENT_KEY")
-	caCertFile     = os.Getenv("CA_CERT")
 	mqttBrokerAddr = os.Getenv("MQTT_BROKER_ADDR")
 	mqttClientID   = os.Getenv("MQTT_CLIENT_ID")
 	mqttTopic      = os.Getenv("MQTT_TOPIC")
@@ -87,7 +84,10 @@ func (g *gateway) stop() {
 }
 
 func buildCollectorClient() (pb.CollectorClient, closeFunc) {
-	conn, err := grpc.NewClient(collectorAddr, grpc.WithTransportCredentials(buildTransportCredentials()))
+	conn, err := grpc.NewClient(
+		collectorAddr,
+		grpc.WithTransportCredentials(tlsutil.BuildTransportCredentials()),
+	)
 	if err != nil {
 		log.Fatalf("Failed to create collector client: %s", err)
 	}
@@ -95,32 +95,26 @@ func buildCollectorClient() (pb.CollectorClient, closeFunc) {
 	return pb.NewCollectorClient(conn), conn.Close
 }
 
-func buildTransportCredentials() credentials.TransportCredentials {
-	certificate, err := tls.LoadX509KeyPair(clientCert, clientKey)
-	if err != nil {
-		log.Fatalf("Failed to load client certificate: %s", err)
-	}
-
-	caCert, err := os.ReadFile(caCertFile)
-	if err != nil {
-		log.Fatalf("Failed to read CA certificate: %s", err)
-	}
-
-	caCertPool := x509.NewCertPool()
-	if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
-		log.Fatalf("Failed to append CA certificate to pool")
-	}
-
-	return credentials.NewTLS(&tls.Config{
-		Certificates: []tls.Certificate{certificate},
-		RootCAs:      caCertPool,
-	})
-}
-
 func buildMQTTClient() mqtt.Client {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(mqttBrokerAddr)
 	opts.SetClientID(mqttClientID)
+
+	tlsConfig, err := tlsutil.BuildTLSConfig()
+	if err != nil {
+		log.Fatalf("Failed to build TLS config: %s", err)
+	}
+	opts.SetTLSConfig(tlsConfig)
+
+	opts.SetAutoReconnect(true)
+	opts.SetMaxReconnectInterval(5 * time.Second)
+
+	opts.SetCleanSession(true)
+	opts.SetKeepAlive(2 * time.Second)
+
+	opts.SetConnectRetry(true)
+	opts.SetConnectRetryInterval(5 * time.Second)
+
 	opts.SetConnectionAttemptHandler(func(broker *url.URL, tlsCfg *tls.Config) *tls.Config {
 		log.Printf("%s attempting to connect to MQTT broker: %s\n", mqttClientID, broker)
 		return tlsCfg
@@ -129,7 +123,7 @@ func buildMQTTClient() mqtt.Client {
 		log.Printf("%s connected to MQTT broker: %s\n", mqttClientID, mqttBrokerAddr)
 	})
 	opts.SetConnectionLostHandler(func(client mqtt.Client, err error) {
-		log.Fatalf("%s lost connection to MQTT broker: %s - %s\n", mqttClientID, mqttBrokerAddr, err)
+		log.Printf("%s lost connection to MQTT broker: %s - %s\n", mqttClientID, mqttBrokerAddr, err)
 	})
 
 	return mqtt.NewClient(opts)
