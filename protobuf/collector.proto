@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "sensors.proto";
+
 option go_package = "github.com/ndesai96/houseplants/protobuf";
 
 package protobuf;
@@ -10,6 +12,7 @@ service Collector {
 
 message SendMoistureDataRequest {
   string deviceID = 1;
+  MoistureData data = 2;
 }
 
 message SendMoistureDataResponse {}

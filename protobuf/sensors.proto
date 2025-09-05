@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "github.com/ndesai96/houseplants/protobuf";
+
+package protobuf;
+
+message MoistureData {
+  int32 moisture = 1;
+  int32 temperature = 2;
+  int32 light = 3;
+}

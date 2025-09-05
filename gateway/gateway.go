@@ -4,16 +4,16 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"log"
 	"net/url"
 	"os"
 	"strings"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	pb "github.com/ndesai96/houseplants/protobuf"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 var (
@@ -58,12 +58,27 @@ func (g *gateway) mqttMessageHandler(ctx context.Context) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		topicPrefix := strings.TrimSuffix(mqttTopic, "#")
 		deviceID := strings.TrimPrefix(msg.Topic(), topicPrefix)
-		if _, err := g.collectorClient.SendMoistureData(ctx, &pb.SendMoistureDataRequest{
+		data, err := parseMoistureData(msg.Payload())
+		if err != nil {
+			log.Printf("Failed to parse moisture data: %s\n", err)
+			return
+		}
+
+		if _, err = g.collectorClient.SendMoistureData(ctx, &pb.SendMoistureDataRequest{
 			DeviceID: deviceID,
+			Data:     data,
 		}); err != nil {
 			log.Printf("Failed to send moisture data to collector: %s\n", err)
 		}
 	}
+}
+
+func parseMoistureData(msg []byte) (*pb.MoistureData, error) {
+	var data pb.MoistureData
+	if err := json.Unmarshal(msg, &data); err != nil {
+		return nil, err
+	}
+	return &data, nil
 }
 
 func (g *gateway) stop() {

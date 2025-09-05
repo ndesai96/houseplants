@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"log"
-	"math/rand"
 	"net"
 	"os"
 	"time"
@@ -14,7 +13,9 @@ import (
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	pb "github.com/ndesai96/houseplants/protobuf"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -30,19 +31,21 @@ type server struct {
 }
 
 func (s *server) SendMoistureData(_ context.Context, req *pb.SendMoistureDataRequest) (*pb.SendMoistureDataResponse, error) {
+	if req.DeviceID == "" {
+		return nil, status.Error(codes.InvalidArgument, "deviceID is empty")
+	}
+	if req.Data == nil {
+		return nil, status.Error(codes.InvalidArgument, "data is empty")
+	}
 	p := influxdb2.NewPointWithMeasurement("houseplants").
 		AddTag("device", req.DeviceID).
-		AddField("moisture", randomize(0, 100)).
-		AddField("temperature", randomize(100, 200)).
-		AddField("light", randomize(200, 300)).
+		AddField("moisture", req.Data.Moisture).
+		AddField("temperature", req.Data.Temperature).
+		AddField("light", req.Data.Light).
 		SetTime(time.Now())
 	s.writer.WritePoint(p)
 
 	return &pb.SendMoistureDataResponse{}, nil
-}
-
-func randomize(min, max int) int {
-	return rand.Intn(max-min+1) + min
 }
 
 func (s *server) start() {
