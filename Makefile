@@ -6,16 +6,24 @@ protoc:
 collector:
 	@echo "Starting collector"
 	cd collector && \
+		SERVER_CERT=../certs/collector.crt \
+		SERVER_KEY=../certs/collector.key \
+		CA_CERT=../certs/ca.crt \
+		INFLUXDB_URL=http://localhost:8086 \
+		INFLUXDB_TOKEN=1bf3923b-f692-4ed5-86df-2bcee192b72f \
+		INFLUXDB_ORG=home \
+		INFLUXDB_BUCKET=houseplants \
+		MTLS_ENABLED=true \
 		go run .
 
 gateway:
 	@echo "Starting gateway"
 	cd gateway && \
 		COLLECTOR_ADDR=localhost:50051 \
-		CLIENT_CERT=../certs/client.crt \
-		CLIENT_KEY=../certs/client.key \
-		CA_CERT=../certs/ca.crt
-		MQTT_BROKER_ADDR=localhost:1883 \
+		CLIENT_CERT=../certs/gateway.crt \
+		CLIENT_KEY=../certs/gateway.key \
+		CA_CERT=../certs/ca.crt \
+		MQTT_BROKER_ADDR=ssl://localhost:8883 \
 		MQTT_CLIENT_ID=gateway \
 		MQTT_TOPIC=houseplants/# \
 		go run .

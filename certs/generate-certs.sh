@@ -24,6 +24,7 @@ subjectAltName = @alt_names
 
 [alt_names]
 DNS.1 = ${COLLECTOR_HOSTNAME}
+DNS.2 = localhost
 EOF
 
 # Generate a certificate signing request (CSR) for the collector.
