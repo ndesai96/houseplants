@@ -5,7 +5,7 @@
 #define DEFAULT_ADDR 0x20
 
 // Register Addresses of the sensor
-#define GET_MOISTURE 	0x00 // (r) 2 bytes
+#define GET_CAPACITANCE 0x00 // (r) 2 bytes
 #define SET_ADDRESS 	0x01 // (w) 1 byte
 #define GET_ADDRESS 	0x02 // (r) 1 byte
 #define MEASURE_LIGHT 	0x03 // (w) n/a

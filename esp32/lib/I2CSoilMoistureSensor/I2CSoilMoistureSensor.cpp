@@ -10,7 +10,14 @@ void I2CSoilMoistureSensor::begin() {
 }
 
 bool I2CSoilMoistureSensor::validateAddress() {
+    if (_address < 1 || _address > 127) {
+        return false; // Invalid I2C address
+    }
     return (readRegister8(GET_ADDRESS) == _address);
+}
+
+unsigned int I2CSoilMoistureSensor::getMoisture() {
+    return readRegister16(GET_CAPACITANCE);
 }
 
 bool I2CSoilMoistureSensor::setAddress(int newAddress) {
@@ -27,6 +34,10 @@ bool I2CSoilMoistureSensor::setAddress(int newAddress) {
 
 uint8_t I2CSoilMoistureSensor::getAddress() {
     return _address;
+}
+
+int I2CSoilMoistureSensor::getTemperature() {
+    return readRegister16(GET_TEMPERATURE);
 }
 
 void I2CSoilMoistureSensor::reset() {
