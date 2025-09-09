@@ -28,7 +28,7 @@ class I2CSoilMoistureSensor {
         bool setAddress(int newAddress);
         uint8_t getAddress();
         void measureLight();
-        unsigned int getLight();
+        unsigned int getLight(bool wait = true);
         int getTemperature();
         void reset();
         uint8_t getVersion();

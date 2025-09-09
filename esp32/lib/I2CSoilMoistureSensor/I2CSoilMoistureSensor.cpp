@@ -36,6 +36,18 @@ uint8_t I2CSoilMoistureSensor::getAddress() {
     return _address;
 }
 
+void I2CSoilMoistureSensor::measureLight() {
+    writeRegister8(MEASURE_LIGHT);
+}
+
+unsigned int I2CSoilMoistureSensor::getLight(bool wait) {
+    if (wait) {
+        measureLight();
+        delay(3000); // Wait for the measurement to complete
+    }
+    return readRegister16(GET_LIGHT);
+}
+
 int I2CSoilMoistureSensor::getTemperature() {
     return readRegister16(GET_TEMPERATURE);
 }

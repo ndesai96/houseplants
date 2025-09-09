@@ -25,6 +25,21 @@ void setup() {
 }
 
 void loop() {
-  scan();
-  delay(5000); // Wait 5 seconds before the next scan
+  unsigned int moisture = sensor.getMoisture();
+  float temperature = sensor.getTemperature() / 10.0;
+  unsigned int light = sensor.getLight();
+
+  Serial.print("Moisture: ");
+  Serial.print(moisture);
+
+  Serial.print(", Temperature: ");
+  Serial.print(temperature);
+  Serial.print("°C");
+
+  Serial.print(", Light: ");
+  Serial.print(light);
+
+  Serial.println();
+
+  delay(1000); // Wait 1 second before the next scan
 }
