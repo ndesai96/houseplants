@@ -33,6 +33,12 @@ certs:
 	cd certs && \
 		./generate-certs.sh $(COLLECTOR_HOSTNAME) $(BROKER_HOSTNAME)
 
+upload-certs:
+	@echo "Uploading certificates to ESP-32"
+	cp certs/sensor.* esp32/data
+	cp certs/ca.crt esp32/data
+	cd esp32 && platformio run --target buildfs --environment esp32dev && platformio run --target uploadfs --environment esp32dev
+
 docker:
 	@echo "Building Docker images"
 	docker build -t houseplants-gateway -f gateway/Dockerfile .
@@ -54,4 +60,4 @@ mock-sensor:
         CA_CERT=../../certs/ca.crt \
 		go run publisher.go
 
-.PHONY: protoc collector gateway certs docker tidy mock-sensor
+.PHONY: protoc collector gateway certs upload-certs docker tidy mock-sensor
