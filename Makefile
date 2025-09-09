@@ -35,6 +35,7 @@ certs:
 
 upload-certs:
 	@echo "Uploading certificates to ESP-32"
+	mkdir -p esp32/data
 	cp certs/sensor.* esp32/data
 	cp certs/ca.crt esp32/data
 	cd esp32 && platformio run --target buildfs --environment esp32dev && platformio run --target uploadfs --environment esp32dev
