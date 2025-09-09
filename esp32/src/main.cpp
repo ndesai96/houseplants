@@ -8,6 +8,9 @@ I2CSoilMoistureSensor sensor(sensorAddress);
 
 void setup() {
   Serial.begin(115200);
+  Wire.begin();
+  delay(100);
+  
   sensor.begin();
 
   if (!sensor.validateAddress()) {

@@ -4,8 +4,6 @@
 I2CSoilMoistureSensor::I2CSoilMoistureSensor(uint8_t address) : _address(address) {}
 
 void I2CSoilMoistureSensor::begin() {
-    Wire.begin();
-    delay(100); // Allow some time for the sensor to initialize
     reset();
 }
 
