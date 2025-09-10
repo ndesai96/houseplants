@@ -59,6 +59,14 @@ uint8_t I2CSoilMoistureSensor::getVersion() {
     return readRegister8(GET_VERSION);
 }
 
+void I2CSoilMoistureSensor::sleep() {
+    writeRegister8(SLEEP);
+}
+
+bool I2CSoilMoistureSensor::isBusy() {
+    return (readRegister8(GET_BUSY) == 1);
+}
+
 void I2CSoilMoistureSensor::writeRegister8(int reg) {
   Wire.beginTransmission(_address);
   Wire.write(reg);

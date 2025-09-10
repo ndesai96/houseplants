@@ -10,8 +10,11 @@
 const char* ssid     = "Your_SSID";
 const char* password = "Your_PASSWORD";
 
-const char* mqttServer = "192.168.1.133"; // use ipconfig getifaddr en0 to find your local IP address
+const char* mqttServer = "192.168.1.137"; // use ipconfig getifaddr en0 to find your local IP address
 const char* mqttTopic = "houseplants/esp32";
+
+const long waitForLightInterval = 3000; // Interval to wait for light measurement to complete
+const long readInterval = 10000; // Interval to wait between sensor reads (10 seconds)
 
 uint8_t sensorAddress = 0x20;
 I2CSoilMoistureSensor sensor(sensorAddress);
@@ -27,27 +30,27 @@ void setCerts() {
     while (1);
   }
 
-  String caCert = fileReader.readFile("/ca.crt");
-  if (caCert.isEmpty()) {
+  const char* caCert = fileReader.readFile("/ca.crt");
+  if (caCert == nullptr) {
     Serial.println("Failed to read ca.crt");
     while (1);
   }
 
-  String sensorCert = fileReader.readFile("/sensor.crt");
-  if (sensorCert.isEmpty()) {
+  const char* sensorCert = fileReader.readFile("/sensor.crt");
+  if (sensorCert == nullptr) {
     Serial.println("Failed to read sensor.crt");
     while (1);
   }
 
-  String sensorKey = fileReader.readFile("/sensor.key");
-  if (sensorKey.isEmpty()) {
+  const char* sensorKey = fileReader.readFile("/sensor.key");
+  if (sensorKey == nullptr) {
     Serial.println("Failed to read sensor.key");
     while (1);
   }
 
-  wifiClient.setCACert(caCert.c_str());
-  wifiClient.setCertificate(sensorCert.c_str());
-  wifiClient.setPrivateKey(sensorKey.c_str());
+  wifiClient.setCACert(caCert);
+  wifiClient.setCertificate(sensorCert);
+  wifiClient.setPrivateKey(sensorKey);
 }
 
 void connectToWiFi() {
@@ -103,22 +106,72 @@ void setup() {
   connectToWiFi();
 }
 
+enum State {
+  WAITING_FOR_INTERVAL,
+  WAITING_FOR_LIGHT,
+  READING_SENSORS,
+  PUBLISHING_DATA,
+};
+
+State currentState = WAITING_FOR_INTERVAL;
+
+unsigned int moisture;
+float temperature;
+unsigned int light;
+
+unsigned long lastSensorRead = 0;
+unsigned long startedMeasuringLight = 0;
+
 void loop() {
-  unsigned int moisture = sensor.getMoisture();
-  float temperature = sensor.getTemperature() / 10.0;
-  unsigned int light = sensor.getLight();
+  if (!mqttClient.connected()) {
+    connectToMQTT();
+  }
+  mqttClient.loop();
 
-  Serial.print("Moisture: ");
-  Serial.print(moisture);
+  unsigned long currentTime = millis();
 
-  Serial.print(", Temperature: ");
-  Serial.print(temperature);
-  Serial.print("°C");
+  switch (currentState) {
+    case WAITING_FOR_INTERVAL: {
+      if (currentTime - lastSensorRead >= readInterval - waitForLightInterval) {
+        startedMeasuringLight = currentTime;
+        sensor.measureLight();
+        currentState = WAITING_FOR_LIGHT;
+      }
+      break;
+    }
 
-  Serial.print(", Light: ");
-  Serial.print(light);
+    case WAITING_FOR_LIGHT: {
+      if (currentTime - startedMeasuringLight >= waitForLightInterval) {
+        currentState = READING_SENSORS;
+      }
+      break;
+    }
 
-  Serial.println();
+    case READING_SENSORS: {
+      moisture = sensor.getMoisture();
+      temperature = sensor.getTemperature() / 10.0;
+      light = sensor.getLight(false);
+      currentState = PUBLISHING_DATA;
+      lastSensorRead = currentTime;
+      break;
+    }
 
-  delay(1000); // Wait 1 second before the next scan
+    case PUBLISHING_DATA: {
+      // TODO: Publish data to MQTT
+      Serial.print("Moisture: ");
+      Serial.print(moisture);
+
+      Serial.print(", Temperature: ");
+      Serial.print(temperature);
+      Serial.print("°C");
+
+      Serial.print(", Light: ");
+      Serial.print(light);
+
+      Serial.println();
+
+      currentState = WAITING_FOR_INTERVAL;
+      break;
+    }
+  }
 }

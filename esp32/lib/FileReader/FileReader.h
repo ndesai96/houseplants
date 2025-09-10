@@ -7,7 +7,7 @@ class FileReader {
 public:
     FileReader();
     bool begin();
-    String readFile(const char* filename);
+    char* readFile(const char* filename);
 };
 
 #endif // FILE_READER_H

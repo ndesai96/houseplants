@@ -10,15 +10,23 @@ bool FileReader::begin() {
     return true;
 }
 
-String FileReader::readFile(const char* filename) {
+char* FileReader::readFile(const char* filename) {
     File file = SPIFFS.open(filename, "r");
     if(!file){
         Serial.printf("Failed to open file: %s\n", filename);
-        return "";
+        return nullptr;
     }
 
     String content = file.readString();
     file.close();
 
-    return content;
+    if (content.length() == 0) {
+        Serial.printf("File is empty: %s\n", filename);
+        return nullptr;
+    }
+
+    char* result = new char[content.length() + 1];
+    strcpy(result, content.c_str());
+    
+    return result;
 }
