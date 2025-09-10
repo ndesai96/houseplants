@@ -13,8 +13,12 @@ const char* password = "Your_PASSWORD";
 const char* mqttServer = "192.168.1.137"; // use ipconfig getifaddr en0 to find your local IP address
 const char* mqttTopic = "houseplants/esp32";
 
-const long waitForLightInterval = 3000; // Interval to wait for light measurement to complete
-const long readInterval = 10000; // Interval to wait between sensor reads (10 seconds)
+// Interval to wait for light measurement to complete
+const long waitForLightInterval = 3000; // 3 seconds
+
+// Interval to wait between sensor reads
+// Must be greater than waitForLightInterval
+const long readInterval = 10000; // 10 seconds
 
 char clientId[32];
 
@@ -107,13 +111,13 @@ void setup() {
   connectToWiFi();
 }
 
-String buildJsonPayload(unsigned int moisture, float temperature, unsigned int light) {
-  String json = "{";
-  json += "\"moisture\":" + String(moisture) + ",";
-  json += "\"temperature\":" + String(temperature, 2) + ",";
-  json += "\"light\":" + String(light);
-  json += "}";
-  return json;
+bool publishData(unsigned int moisture, float temperature, unsigned int light) {
+  String payload = "{";
+  payload += "\"moisture\":" + String(moisture) + ",";
+  payload += "\"temperature\":" + String(temperature, 2) + ",";
+  payload += "\"light\":" + String(light);
+  payload += "}";
+  return mqttClient.publish(mqttTopic, payload.c_str());
 }
 
 enum State {
@@ -167,12 +171,9 @@ void loop() {
     }
 
     case PUBLISHING_DATA: {
-      String payload = buildJsonPayload(moisture, temperature, light);
-      if (!mqttClient.publish(mqttTopic, payload.c_str())) {
-        Serial.print("Failed to publish data to");
-        Serial.print(mqttTopic);
-        Serial.println(" with payload: ");
-        Serial.println(payload);
+      if (!publishData(moisture, temperature, light)) {
+        Serial.print("Failed to publish data to ");
+        Serial.println(mqttTopic);
       }
       currentState = WAITING_FOR_INTERVAL;
       break;
