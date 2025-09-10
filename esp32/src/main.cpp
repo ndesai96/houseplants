@@ -16,6 +16,8 @@ const char* mqttTopic = "houseplants/esp32";
 const long waitForLightInterval = 3000; // Interval to wait for light measurement to complete
 const long readInterval = 10000; // Interval to wait between sensor reads (10 seconds)
 
+char clientId[32];
+
 uint8_t sensorAddress = 0x20;
 I2CSoilMoistureSensor sensor(sensorAddress);
 
@@ -66,13 +68,10 @@ void connectToWiFi() {
 }
 
 void connectToMQTT() {
-  mqttClient.setServer(mqttServer, 8883);
-  
-  char clientId[32];
-  snprintf(clientId, sizeof(clientId), "ESP32-%08X", (unsigned int)esp_random());
+  mqttClient.setServer(mqttServer, 8883);  
 
   while (!mqttClient.connected()) {
-    Serial.print("Connecting to MQTT broker...");
+    Serial.printf("Connecting to MQTT broker %s...", mqttServer);
     if (mqttClient.connect(clientId)) {
       Serial.println("success");
     } else {
@@ -102,8 +101,19 @@ void setup() {
   Serial.print("Sensor Firmware version: ");
   Serial.println(sensor.getVersion(), HEX);
 
+  snprintf(clientId, sizeof(clientId), "ESP32-%08X", (unsigned int)esp_random());
+
   setCerts();
   connectToWiFi();
+}
+
+String buildJsonPayload(unsigned int moisture, float temperature, unsigned int light) {
+  String json = "{";
+  json += "\"moisture\":" + String(moisture) + ",";
+  json += "\"temperature\":" + String(temperature, 2) + ",";
+  json += "\"light\":" + String(light);
+  json += "}";
+  return json;
 }
 
 enum State {
@@ -157,19 +167,13 @@ void loop() {
     }
 
     case PUBLISHING_DATA: {
-      // TODO: Publish data to MQTT
-      Serial.print("Moisture: ");
-      Serial.print(moisture);
-
-      Serial.print(", Temperature: ");
-      Serial.print(temperature);
-      Serial.print("°C");
-
-      Serial.print(", Light: ");
-      Serial.print(light);
-
-      Serial.println();
-
+      String payload = buildJsonPayload(moisture, temperature, light);
+      if (!mqttClient.publish(mqttTopic, payload.c_str())) {
+        Serial.print("Failed to publish data to");
+        Serial.print(mqttTopic);
+        Serial.println(" with payload: ");
+        Serial.println(payload);
+      }
       currentState = WAITING_FOR_INTERVAL;
       break;
     }
