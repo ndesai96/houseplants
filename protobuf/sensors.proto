@@ -6,6 +6,6 @@ package protobuf;
 
 message MoistureData {
   int32 moisture = 1;
-  int32 temperature = 2;
+  float temperature = 2;
   int32 light = 3;
 }
