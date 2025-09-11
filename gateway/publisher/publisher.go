@@ -53,7 +53,7 @@ func main() {
 func generateMoistureData() *pb.MoistureData {
 	return &pb.MoistureData{
 		Moisture:    randomize(0, 100),
-		Temperature: randomize(100, 200),
+		Temperature: float32(randomize(100, 200)),
 		Light:       randomize(200, 300),
 	}
 }
