@@ -28,10 +28,9 @@ gateway:
 		MQTT_TOPIC=houseplants/# \
 		go run .
 
-certs:
-	@echo "Generating certificates"
-	cd certs && \
-		./generate-certs.sh $(COLLECTOR_HOSTNAME) $(BROKER_HOSTNAME)
+ca:
+	@echo "Generate certificate authority"
+	cd certs && ./generate-ca.sh
 
 upload-certs:
 	@echo "Uploading certificates to ESP-32"
@@ -61,4 +60,4 @@ mock-sensor:
         CA_CERT=../../certs/ca.crt \
 		go run publisher.go
 
-.PHONY: protoc collector gateway certs upload-certs docker tidy mock-sensor
+.PHONY: protoc collector gateway ca upload-certs docker tidy mock-sensor
