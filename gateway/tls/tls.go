@@ -36,7 +36,11 @@ func BuildTLSConfig() (*tls.Config, error) {
 		return nil, fmt.Errorf("failed to read CA certificate: %s", err)
 	}
 
-	caCertPool := x509.NewCertPool()
+	caCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		log.Fatalf("failed to get system cert pool: %v", err)
+	}
+
 	if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
 		return nil, fmt.Errorf("failed to append CA certificate to pool")
 	}

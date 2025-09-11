@@ -5,7 +5,7 @@ FROM golang:1.25.0-alpine AS builder
 WORKDIR /app
 
 # Install Protobuf compiler and Go plugins
-RUN apk add --no-cache protobuf make
+RUN apk add --no-cache protobuf make ca-certificates
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
@@ -36,6 +36,9 @@ WORKDIR /app
 
 # Copy the binary from builder
 COPY --from=builder /app/gateway/main .
+
+# Copy the CA certificates from the builder stage
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Run the application
 CMD ["./main"]

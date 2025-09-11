@@ -110,6 +110,7 @@ func (g *gateway) mqttMessageHandler(ctx context.Context) mqtt.MessageHandler {
 			log.Printf("Failed to parse moisture data: %s\n", err)
 			return
 		}
+		log.Printf("Received moisture data from device '%s': %+v\n", deviceID, data)
 
 		if _, err = g.collectorClient.SendMoistureData(ctx, &pb.SendMoistureDataRequest{
 			DeviceID: deviceID,
