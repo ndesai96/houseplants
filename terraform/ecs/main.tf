@@ -19,12 +19,12 @@ module "ecs_fargate" {
   app_protocol         = "HTTP"
   app_protocol_version = "GRPC"
   app_envs = {
-    DB_URL    = var.influxdb_url
-    DB_BUCKET = var.influxdb_bucket
-    DB_ORG    = var.influxdb_organization
+    INFLUXDB_URL    = var.influxdb_url
+    INFLUXDB_BUCKET = var.influxdb_bucket
+    INFLUXDB_ORG    = var.influxdb_organization
   }
   app_secrets = {
-    DB_TOKEN = var.influxdb_api_token_secret_arn
+    INFLUXDB_TOKEN = var.influxdb_api_token_secret_arn
   }
   aws_region      = "us-east-1"
   ca_cert         = var.ca_cert
