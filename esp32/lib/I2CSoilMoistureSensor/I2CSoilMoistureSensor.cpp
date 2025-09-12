@@ -68,16 +68,16 @@ bool I2CSoilMoistureSensor::isBusy() {
 }
 
 void I2CSoilMoistureSensor::writeRegister8(int reg) {
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  Wire.endTransmission();
+    Wire.beginTransmission(_address);
+    Wire.write(reg);
+    Wire.endTransmission();
 }
 
 void I2CSoilMoistureSensor::writeRegister8(int reg, int value) {
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  Wire.write(value);
-  Wire.endTransmission();
+    Wire.beginTransmission(_address);
+    Wire.write(reg);
+    Wire.write(value);
+    Wire.endTransmission();
 }
 
 uint8_t I2CSoilMoistureSensor::readRegister8(int reg) {
