@@ -5,13 +5,15 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
+#include <WiFiManager.h>
 #include <Wire.h>
 
-const char* ssid     = "Your_SSID";
-const char* password = "Your_PASSWORD";
+WiFiManager wm;
 
-const char* mqttServer = "192.168.1.137"; // use ipconfig getifaddr en0 to find your local IP address
-const char* mqttTopic = "houseplants/esp32";
+char mqttServer[40]; // use ipconfig getifaddr en0 to find your local IP address
+char houseplantName[40];
+const char* mqttTopicPrefix = "houseplants/";
+char mqttTopic[80];
 
 // Interval to wait for light measurement to complete
 const long waitForLightInterval = 3000; // 3 seconds
@@ -20,8 +22,6 @@ const long waitForLightInterval = 3000; // 3 seconds
 // Must be greater than waitForLightInterval
 const long readInterval = 10000; // 10 seconds
 
-char clientId[32];
-
 uint8_t sensorAddress = 0x20;
 I2CSoilMoistureSensor sensor(sensorAddress);
 
@@ -29,6 +29,52 @@ FileReader fileReader;
 
 WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
+
+void setupWiFiManager() {
+  WiFiManagerParameter custom_mqtt_server("server", "MQTT Server", mqttServer, 40);
+  WiFiManagerParameter custom_houseplant_name("houseplant", "Houseplant Name", houseplantName, 40);
+  wm.addParameter(&custom_mqtt_server);
+  wm.addParameter(&custom_houseplant_name);
+
+  wm.setConfigPortalTimeout(180); // 3 minutes
+
+  if (!wm.autoConnect("HouseplantMonitorAP")) {
+    Serial.println("Failed to connect and hit timeout");
+    ESP.restart();
+  }
+
+  // If you get here you have connected to the WiFi
+  wm.stopConfigPortal();
+
+  Serial.println("Connected to WiFi: " + String(WiFi.SSID()));
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Read the custom parameters
+  strncpy(mqttServer, custom_mqtt_server.getValue(), sizeof(mqttServer));
+  strncpy(houseplantName, custom_houseplant_name.getValue(), sizeof(houseplantName));
+
+  // Validate that the parameters are not empty
+  if (strlen(mqttServer) == 0 || strlen(houseplantName) == 0) {
+    Serial.println("MQTT Server or Topic is empty. Clearing WiFi settings and restarting.");
+    Serial.println("Please re-configure with non-empty values.");
+    
+    wm.resetSettings();
+
+    delay(3000);
+    ESP.restart();
+  }
+
+  // Construct the MQTT topic
+  snprintf(mqttTopic, sizeof(mqttTopic), "%s%s", mqttTopicPrefix, houseplantName);
+
+  Serial.print("MQTT Server: ");
+  Serial.println(mqttServer);
+  Serial.print("Plant Name: ");
+  Serial.println(houseplantName);
+  Serial.print("MQTT Topic: ");
+  Serial.println(mqttTopic);
+}
 
 void setCerts() {
   if (!fileReader.begin()) {
@@ -59,24 +105,12 @@ void setCerts() {
   wifiClient.setPrivateKey(sensorKey);
 }
 
-void connectToWiFi() {
-  Serial.printf("Connecting to %s...", ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
-    Serial.print(".");
-  }
-  Serial.println("success");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
 void connectToMQTT() {
   mqttClient.setServer(mqttServer, 8883);  
 
   while (!mqttClient.connected()) {
     Serial.printf("Connecting to MQTT broker %s...", mqttServer);
-    if (mqttClient.connect(clientId)) {
+    if (mqttClient.connect(houseplantName)) {
       Serial.println("success");
     } else {
       Serial.print("failed, rc=");
@@ -89,6 +123,8 @@ void connectToMQTT() {
 
 void setup() {
   Serial.begin(115200);
+  setupWiFiManager();
+
   Wire.begin();
   delay(100);
   sensor.begin();
@@ -105,10 +141,7 @@ void setup() {
   Serial.print("Sensor Firmware version: ");
   Serial.println(sensor.getVersion(), HEX);
 
-  snprintf(clientId, sizeof(clientId), "ESP32-%08X", (unsigned int)esp_random());
-
   setCerts();
-  connectToWiFi();
 }
 
 bool publishData(unsigned int moisture, float temperature, unsigned int light) {
@@ -117,6 +150,7 @@ bool publishData(unsigned int moisture, float temperature, unsigned int light) {
   payload += "\"temperature\":" + String(temperature, 2) + ",";
   payload += "\"light\":" + String(light);
   payload += "}";
+  Serial.println("Payload: " + payload);
   return mqttClient.publish(mqttTopic, payload.c_str());
 }
 
