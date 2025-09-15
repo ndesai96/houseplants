@@ -1,0 +1,11 @@
+influxdb_username     = "admin"
+influxdb_password     = "houseplants"
+influxdb_bucket       = "houseplants"
+influxdb_organization = "home"
+
+app_image        = ""
+ca_cert          = "/path/to/houseplants/certs/ca.crt"
+certificate_arn  = ""
+hosted_zone_id   = ""
+hosted_zone_name = ""
+subdomain        = "houseplants"
