@@ -113,3 +113,9 @@ The `gateway` directory contains the Go-based gateway service that subscribes to
     ```
 
 3. Verify that the gateway service is running and successfully forwarding data to the collector service.
+
+## Prototype
+
+Here is a prototype of the complete setup:
+
+![prototype](./img/prototype.png)
