@@ -24,6 +24,7 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = ${BROKER_HOSTNAME}
 DNS.2 = mosquitto
+DNS.3 = raspberrypi.local
 EOF
 
 # Generate a certificate signing request (CSR) for the broker

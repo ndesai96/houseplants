@@ -52,7 +52,7 @@ This project uses the Eclipse Mosquitto MQTT broker. You can install it on a Ras
 2. Generate the certificates for the MQTT broker and gateway:
 
     ```bash
-    make broker-certs BROKER_HOSTNAME=<MQTT_BROKER_IP>
+    make gateway-certs BROKER_HOSTNAME=<MQTT_BROKER_IP>
     ```
 
 3. Start the MQTT broker using Docker Compose:
