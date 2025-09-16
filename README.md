@@ -29,7 +29,7 @@ This project serves as a practical, hands-on learning experience of a modern IoT
 
 ### CA Certificate
 
-The `certs` directory contains the scripts and configuration files needed to generate the certificates for end-to-end mTLS authentication. This ensures that all communication between the sensor, gateway, collector, and MQTT broker is encrypted and secure.
+The `certs` directory contains the scripts needed to generate the certificates for end-to-end mTLS authentication. This ensures that all communication between the sensor, gateway, collector, and MQTT broker is encrypted and secure.
 
 Generate a root CA certificate and private key for signing other certificates:
 
@@ -55,10 +55,17 @@ This project uses the Eclipse Mosquitto MQTT broker. You can install it on a Ras
     make gateway-certs BROKER_HOSTNAME=<MQTT_BROKER_IP>
     ```
 
-3. Start the MQTT broker using Docker Compose:
+3. Create network
 
     ```bash
-    docker-compose -f docker/mosquitto/docker-compose.yml up -d
+    ./docker/create-network.sh
+    ```
+
+4. Start the MQTT broker using Docker Compose:
+
+    ```bash
+    cd docker/mosquitto
+    docker compose up -d
     ```
 
 ### ESP-32 and Moisture Sensor
@@ -106,13 +113,16 @@ The `gateway` directory contains the Go-based gateway service that subscribes to
     docker build -t houseplants/gateway:latest -f docker/gateway/Dockerfile .
     ```
 
-2. Run the gateway service using Docker Compose and provide the collector service address as an environment variable:
+2. Update the `COLLECTOR_ADDR` environment variable in the `docker/gateway/compose.yaml` file with the address of the collector service deployed on AWS ECS Fargate.
+
+3. Run the gateway service using Docker Compose and provide the collector service address as an environment variable:
 
     ```bash
-    docker-compose -f docker/gateway/docker-compose.yml up -d -e COLLECTOR_ADDR=<COLLECTOR_SERVICE_ADDRESS>
+    cd docker/gateway
+    docker compose up -d
     ```
 
-3. Verify that the gateway service is running and successfully forwarding data to the collector service.
+4. Verify that the gateway service is running and successfully forwarding data to the collector service.
 
 ## Prototype
 
